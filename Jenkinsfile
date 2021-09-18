@@ -32,6 +32,15 @@ pipeline {
                 }
             }
         }
+        
+        stage('Quality Gate'){
+            steps {
+                    timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
         stage('Container Run') {
             steps {
                 sh 'docker stop microservicio-one'
