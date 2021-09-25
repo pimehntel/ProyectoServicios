@@ -15,7 +15,6 @@ pipeline {
                     echo 'Execute Maven and Analizing with SonarServer'
                     withSonarQubeEnv('SonarServer') {
                         sh "mvn clean package \
-                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                             -Djacoco.output=tcpclient \
                             -Djacoco.address=127.0.0.1 \
                             -Djacoco.port=10001"
