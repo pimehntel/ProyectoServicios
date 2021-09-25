@@ -21,6 +21,27 @@ pipeline {
                 }
             }
         }
+
+        /*
+        stage('Quality Gate'){
+            steps {
+                    timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
+        */
+        
+        stage('Database') {
+            steps {
+                dir('liquibase/'){
+                    sh '/opt/liquibase/liquibase --version'
+                    sh '/opt/liquibase/liquibase --changeLogFile="changesets/db.changelog-master.xml" update'
+                    echo 'Applying Db changes'
+                }
+            }
+        }
+
         stage('Container Build') {
             steps {
                 dir('microservicio-service/'){
@@ -40,23 +61,14 @@ pipeline {
                     sh 'docker push ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'                    
                 }            
             }
-        }
-        
-        /*
-        stage('Quality Gate'){
-            steps {
-                    timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
-                }
-            }
-        }
-        */
+        }        
 
         stage('Container Run') {
             steps {
                 sh 'docker rmi ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
                 sh 'docker stop microservicio-one || true'
-                sh 'docker run -d --rm --name microservicio-one -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                //Para poner que ambiente, desarrollo, pruebas, prod SPRING_PROFILE_ACTIVE para lo de DB del microservicio
+                sh 'docker run -d --rm --name microservicio-one SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
             }
         }
     }
