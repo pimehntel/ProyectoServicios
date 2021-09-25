@@ -8,9 +8,9 @@ pipeline {
         nodejs 'NodeJs12'    
     }
     stages {
-        stage('Build and Analize Server') {
+        stage('Build and Analize Backend') {
             steps {
-                echo 'Building Server'
+                echo 'Building Backend'
                 dir('microservicio-service/'){
                     echo 'Execute Maven and Analizing with SonarServer'
                     withSonarQubeEnv('SonarServer') {
@@ -23,7 +23,7 @@ pipeline {
             }
         }
 
-        stage('Frontend') {
+        stage('Build Frontend') {
             steps {
                 echo 'Building Frontend'
                 dir('frontend/'){
