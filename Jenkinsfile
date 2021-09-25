@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    enviroment{
+    environment{
         LOCAL_SERVER = '192.168.1.90'
     }
     tools {
