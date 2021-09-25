@@ -12,6 +12,7 @@ pipeline {
                 dir('microservicio-service/'){
                     echo 'Execute Maven and Analizing with SonarServer'
                     withSonarQubeEnv('SonarServer') {
+                        /*
                         sh "mvn clean package dependency-check:check sonar:sonar \
                             -Dsonar.projectKey=21_MyCompany_Microservice \
                             -Dsonar.projectName=21_MyCompany_Microservice \
@@ -20,7 +21,8 @@ pipeline {
                             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                             -Djacoco.output=tcpclient \
                             -Djacoco.address=127.0.0.1 \
-                            -Djacoco.port=10001"
+                            -Djacoco.port=10001"*/
+                        sh "mvn clean package"
                     }
                 }
             }
@@ -40,7 +42,8 @@ pipeline {
             steps {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                     sh 'docker login ${LOCAL_SERVER}:8083 -u $USERNAME -p $PASSWORD'
-                    sh 'docker tag microservicio-service:latest  ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'                    
+                    sh 'docker tag microservicio-service:latest  ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                    sh 'docker push ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'                    
                 }            
             }
         }
@@ -55,6 +58,7 @@ pipeline {
 
         stage('Container Run') {
             steps {
+                sh 'docker rmi ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus'
                 sh 'docker stop microservicio-one || true'
                 sh 'docker run -d --rm --name microservicio-one -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
             }
