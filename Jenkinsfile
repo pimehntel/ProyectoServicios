@@ -27,7 +27,7 @@ pipeline {
             steps {
                 echo 'Building Frontend'
                 dir('frontend/'){
-                    sh 'npm i --save-dev @types/mocha'                    
+                    sh 'npm i --save-dev @types/jest'                    
                     sh 'npm install'
                     sh 'npm run build'
                     sh 'docker stop frontend-one || true'
