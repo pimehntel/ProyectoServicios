@@ -21,6 +21,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Build Frontend') {
             steps {
                 echo 'Building Frontend'
@@ -33,7 +34,7 @@ pipeline {
                 }
             }
         }
-
+        */
 
         /*
         stage('Quality Gate'){
