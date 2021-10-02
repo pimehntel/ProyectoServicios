@@ -109,6 +109,19 @@ pipeline {
                 }
             }
         }*/
+
+        stage('Estress') {
+            steps {
+                dir('Gatling/'){
+                    sh 'mvn gatling:test'
+                }
+            }
+            post {
+                always {
+                    gatlingArchive()
+                }
+            }
+        }
     }
 
     post {
