@@ -3,7 +3,7 @@ spring:
   application:
     name: zuul-server     # This is the name for the remote configuration file
 server:
-  port: 8090 #the default port used for zuul service
+  port: 8000 #the default port used for zuul service
 
 eureka:
   client:
