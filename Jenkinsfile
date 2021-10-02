@@ -13,12 +13,10 @@ pipeline {
                 echo 'Building Backend'
                 dir('microservicio-service/'){
                     echo 'Execute Maven and Analizing with SonarServer'
-                    withSonarQubeEnv('SonarServer') {
                         sh "mvn clean package \
                             -Djacoco.output=tcpclient \
                             -Djacoco.address=127.0.0.1 \
-                            -Djacoco.port=10001"
-                    }
+                            -Djacoco.port=10001"                    
                 }
             }
         }
@@ -106,6 +104,23 @@ pipeline {
                 }
             }
         }
+    }
 
+    post {
+        always {
+            deleteDir()
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'I failed :('
+        }
+        changed {
+            echo 'Things were different before...'
+        }
     }
 }
