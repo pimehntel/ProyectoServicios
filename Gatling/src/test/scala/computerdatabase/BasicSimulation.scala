@@ -13,10 +13,16 @@ class BasicSimulation extends Simulation {
     .acceptLanguageHeader("en-US,en;q=0.5")
     .userAgentHeader("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:16.0) Gecko/20100101 Firefox/16.0")
 
-  val scn = scenario("Scenario Name") // A scenario is a chain of requests and pauses
-    .exec(http("request_1")
-      .get("/"))
+  val scn = scenario("Consultar Usuarios de negocio") // A scenario is a chain of requests and pauses
+    .exec(http("Consulta Usuarios")
+      .get("/users"))
+    .pause(7) // Note that Gatling has recorded real time pauses
+    .exec(http("Validar Ping")
+      .get("/ping"))
     .pause(7) // Note that Gatling has recorded real time pauses
     
-  setUp(scn.inject(atOnceUsers(1)).protocols(httpProtocol))
+  setUp(
+    scn.inject(
+      atOnceUsers(10)
+  ).protocols(httpProtocol))
 }
