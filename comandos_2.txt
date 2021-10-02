@@ -1,0 +1,16 @@
+  870  ls -ltr
+  871  docker run -d -p 8080:8080 -p 50000:50000 -v $(PWD)/jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkins-local
+  872  history
+  873  history >> comandos.tx
+  874  ls -ltr
+  875  docker ps
+  876  cd jenkins_home/workspace
+  877  ls -ltr
+  878  cd ..
+  879  cd ..
+  880  ls -ltr
+  881  rm comandos.tx
+  882  ls -ltr
+  883  cd ..
+  884  cd ProyectoServicios
+  885  ls -ltr
