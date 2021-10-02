@@ -5,7 +5,7 @@ pipeline {
     }
     tools {
         maven 'M3_8_2'
-        nodejs 'NodeJS16'    
+        nodejs 'NodeJS12'    
     }
     stages {
         stage('Build and Analize Backend') {
