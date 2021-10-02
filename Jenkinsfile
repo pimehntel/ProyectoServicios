@@ -1,10 +1,10 @@
 pipeline {
-    agent any
     environment{
         LOCAL_SERVER = '192.168.1.90'
     }
     tools {
         maven 'M3_8_2'
+        nodejs 'NodeJs12'    
     }
     stages {
         stage('Build and Analize Backend') {
