@@ -21,7 +21,6 @@ pipeline {
             }
         }
 
-        /*
         stage('Build Frontend') {
             steps {
                 echo 'Building Frontend'
@@ -34,8 +33,7 @@ pipeline {
                 }
             }
         }
-        */
-
+        
         /*
         stage('Quality Gate'){
             steps {
@@ -79,7 +77,7 @@ pipeline {
         */
         stage('Container Run') {
             steps {
-                //Esto solo es borrar la imagen para ver que se bajse del repo
+                //Esto solo es borrar la imagen para ver que se bajse del repo nexus
                 //sh 'docker rmi ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
                 sh 'docker stop microservicio-one || true'
                 //Para poner que ambiente, desarrollo, pruebas, prod SPRING_PROFILE_ACTIVE para lo de DB del microservicio
@@ -88,16 +86,14 @@ pipeline {
             }
         }
 
-        /*
         stage('Testing') {
             steps {
                 dir('cypress/') {
                     sh 'docker run --rm --name Cypress -v /Users/livierortegavelazquez/Documents/GitHub/EcosistemaJenkins/jenkins_home/workspace/Microservicio/Cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
                 }
             }
-        }*/
+        }
 
-        /*
         stage('tar videos') 
         {
             steps 
@@ -108,7 +104,7 @@ pipeline {
                     allowEmptyArchive: true
                 }
             }
-        }*/
+        }
 
         stage('Estress') {
             steps {
