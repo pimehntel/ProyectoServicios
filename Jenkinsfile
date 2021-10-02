@@ -5,7 +5,7 @@ pipeline {
     }
     tools {
         maven 'M3_8_2'
-        nodejs 'NodeJs12'    
+        nodejs 'NodeJs'    
     }
     stages {
         stage('Build and Analize Backend') {
@@ -27,7 +27,6 @@ pipeline {
             steps {
                 echo 'Building Frontend'
                 dir('frontend/'){
-                    sh 'npm i --save-dev @types/jest'                    
                     sh 'npm install'
                     sh 'npm run build'
                     sh 'docker stop frontend-one || true'
