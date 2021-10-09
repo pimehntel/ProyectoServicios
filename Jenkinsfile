@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment{
-        LOCAL_SERVER = '192.168.1.77'
+        LOCAL_SERVER = '192.168.1.137'
     }
     tools {
         maven 'M3_8_2'
@@ -114,7 +114,7 @@ pipeline {
                 sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 microservicio-service'       
             }
         }
-
+        /*
         stage('Testing') {
             steps {
                 dir('cypress/') {
@@ -134,6 +134,7 @@ pipeline {
                 }
             }
         }
+        */
 
         stage('Estress') {
             steps {
