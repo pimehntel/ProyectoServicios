@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment{
-        LOCAL_SERVER = '192.168.1.77'
+        LOCAL_SERVER = '192.168.1.137'
     }
     tools {
         maven 'M3_8_2'
@@ -115,6 +115,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Testing') {
             steps {
                 dir('cypress/') {
@@ -134,7 +135,7 @@ pipeline {
                 }
             }
         }
-
+        */
         stage('Estress') {
             steps {
                 dir('Gatling/'){
