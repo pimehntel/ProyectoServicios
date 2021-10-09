@@ -21,6 +21,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Build Frontend') {
             steps {
                 echo 'Building Frontend'
@@ -33,7 +34,7 @@ pipeline {
                 }
             }
         }
-        
+        */
         /*
         stage('Quality Gate'){
             steps {
@@ -104,6 +105,7 @@ pipeline {
             }
         }        
         */
+
         stage('Container Run') {
             steps {
                 //Esto solo es borrar la imagen para ver que se bajse del repo nexus
@@ -114,6 +116,7 @@ pipeline {
                 sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 microservicio-service'       
             }
         }
+        
         /*
         stage('Testing') {
             steps {
@@ -136,6 +139,7 @@ pipeline {
         }
         */
 
+        /*
         stage('Estress') {
             steps {
                 dir('Gatling/'){
@@ -148,6 +152,7 @@ pipeline {
                 }
             }
         }
+        */
     }
 
     post {
