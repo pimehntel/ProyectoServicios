@@ -1,3 +1,802 @@
+LabSpringboot: https://github.com/IngJavierR/Curso-Microservicios
+
+Clonar repo: git clone https://github.com/[Su Usuario]/Curso-Microservicios.git
+
+Scaffolding: https://yeoman.io/
+
+Maven:
+mvn clean 
+mvn clean compile
+mvn clean test
+mvn clean package
+
+Patrones de diseño: https://refactoring.guru/design-patterns
+Invoca API Demo(Curso Microservicios): 
+- http://localhost:8090/microservicio/ping 
+- http://localhost:8090/microservicio/users
+
+Mode de madurez de Richardson: https://martinfowler.com/articles/richardsonMaturityModel.html
+
+DockerHub: https://hub.docker.com/
+Windows Server Core: https://docs.microsoft.com/en-us/windows-server/administration/server-core/what-is-server-core
+
+
+Ejercicio Docker:
+docker run hello-world
+docker images 
+docker run -d -p 8100:80 ingjavierr/nginx-angular6
+http://localhost:8100
+
+Network: docker network ls
+Direccionamiento: https://cidr.xyz/
+Install Docker: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-centos-7
+docker version
+
+Ejercicio
+docker run -it -p 8090:80 ubuntu bin/bash
+docker images
+docker ps (Procesos Docker)
+apt-get update -y
+apt-get install -y apache2 apache2-utils
+apt-get install -y vim
+
+# /usr/sbin/apache2ctl start
+# vi /var/www/html/hola.html
+
+<html>
+        <head></head>
+        <body>
+                <h1>Hola Apache</h1>
+        </body>
+</html>
+
+Conectarse a un contenedor corriendo:
+docker exec -it f3350146cb01 bin/bash
+
+Dockerfile:
+FROM ubuntu
+ENV TZ=Europe/Minsk
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt-get update -y && apt-get install -y apache2 apache2-utils
+COPY hola.html /var/www/html/hola.html
+CMD /usr/sbin/apache2ctl -D FOREGROUND
+
+docker build -t hola-image .
+docker run -d -p 8010:80 hola-image
+
+docker network ls
+docker network inspect [NETWORKID]
+
+docker exec -it [CONTAINERID] bin/bash
+
+Busybox (MSUL): docker run -it --rm busybox:musl
+
+Volumenes
+docker run -it --rm -v $(PWD):/tf/notebooks -p 8888:8888 tensorflow/tensorflow:latest-jupyter
+
+
+FROM ubuntu
+RUN mkdir /myvol
+RUN echo "hello world" > /myvol/greeting
+VOLUME /myvol
+Construir: docker build -t prueba-volumen .
+Run: docker run -d prueba-volumen
+Inspect: docker inspect [ContainerId]
+
+Docker jenkins: https://hub.docker.com/_/jenkins
+Docker JenkinsLTS: https://hub.docker.com/r/jenkins/jenkins
+
+Como instalar DockerCE en Alpine:
+# Install the latest Docker CE binaries and add user `jenkins` to the docker group
+RUN apt-get update && \
+    apt-get -y --no-install-recommends install apt-transport-https \
+      ca-certificates \
+      curl \
+      wget \
+      tar \
+      gnupg2 \
+      software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \
+    add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+      $(lsb_release -cs) \
+      stable" && \
+   apt-get update && \
+   apt-get -y --no-install-recommends install docker-ce && \
+   apt-get clean && \
+   usermod -aG docker jenkins
+   
+Construir Imagen Jenkins: docker build -t jenkins-local .
+   
+Notación markdown para repositorios
+Linux/Mac
+docker run -d -p 8080:8080 -p 50000:50000 -v $(PWD)/jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkins-local
+
+Widows
+https://tomgregory.com/running-docker-in-docker-on-windows/
+docker run -d -p 8080:8080 -p 50000:50000 -v "[Path]/jenkins_home:/var/jenkins_home" -v "//var/run/docker.sock:/var/run/docker.sock" jenkins-local
+
+JenkinsURL: http://localhost:8080/
+
+Jenkins Declarative Pipeline: https://www.jenkins.io/doc/book/pipeline/syntax/
+Groovy: https://groovy-lang.org/
+
+Pipeline Inicial:
+pipeline {
+    agent any
+    tools {
+        maven 'M3_8_2'
+    }
+    stages {
+        stage('Paso1') {
+            steps {
+                echo 'Hello World Paso 1'
+                sh 'mvn --version'
+            }
+        }
+        stage('Paso2') {
+            steps {
+                echo 'Hello World Paso 2'
+            }
+        }
+    }
+}
+
+MavenPluginJenkins: M3_8_2
+Actualizar en microservicio ejemplo:
+Pom.xml (padre)
+<spring.version>2.1.1.RELEASE</spring.version>
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-dependencies</artifactId>
+    <version>Greenwich.RELEASE</version>
+    <type>pom</type>
+    <scope>import</scope>
+</dependency>
+
+src/test/java/mx/com/curso/services/BaseTest.java
+src/test/java/mx/com/curso/web/BaseTest.java
+Quitar:
+import org.springframework.boot.test.context.SpringBootTest;
+@SpringBootTest
+
+
+En el archivo .gitignore colocar lo que no queremo versionar:
+.dccache
+
+Inicializar Repo:
+git init
+git add .
+git commit -m "First Commit"
+git remote add origin [Url que termina en .git (sale de Github)]
+
+Colocar Token de Github (si aplica)
+En el archivo config de la carpeta oculta -git
+[remote "origin"]
+    url = https://[token@]github.com/I......
+    
+
+git push origin master
+
+pipeline {
+    agent any
+    tools {
+        maven 'M3_8_2'
+    }
+    stages {
+        stage('Build and Analize') {
+            steps {
+                dir('microservicio-service/'){
+                    echo 'Execute Maven and Analizing with SonarServer'
+                    withSonarQubeEnv('SonarServer') {
+                        sh "mvn clean package sonar:sonar \
+                            -Dsonar.projectKey=21_MyCompany_Microservice \
+                            -Dsonar.projectName=21_MyCompany_Microservice \
+                            -Dsonar.sources=src/main \
+                            -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml"
+                    }
+                }
+            }
+        }
+        stage('Container Build') {
+            steps {
+                dir('microservicio-service/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t microservicio-service .'
+                    }
+                }
+            }
+        }
+        stage('Container Run') {
+            steps {
+                sh 'docker run -d -p 8090:8090 microservicio-service'
+            }
+        }
+    }
+}
+
+Sonarqube (Docker)
+https://docs.sonarqube.org/latest/setup/get-started-2-minutes/
+docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest
+SonarURL: h- ttp://localhost:9000/
+
+DesdeJenkins:
+Opcion1: http://192.168.1.133:9000
+Opción2:
+docker network ls
+docker network inspect [networkid la marcada como bridge]
+Sacar la ip marcada como Sonarqube: http://172.17.0.3:9000
+
+
+sh "mvn clean package sonar:sonar \
+    -Dsonar.projectKey=21_MyCompany_Microservice \
+    -Dsonar.projectName=21_MyCompany_Microservice \
+    -Dsonar.sources=src/main \
+    -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml"
+
+sh "mvn clean package"
+
+
+git commit -a -m "Se agrega sonar stage"
+git push origin master
+
+
+Construir la imagen para el servicio:
+https://hub.docker.com/_/oracle-serverjre-8
+
+Dockerfile for springboot java
+FROM store/oracle/serverjre:8
+COPY microservicio-web/target/microservicio-web-1.0-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])  {
+}
+
+Como agregamos archivos
+git add .
+git commit -a -m "Se agrega build de docker"
+git push origin master
+
+
+Probar el servicio con la URL: http://localhost:8090/microservicio/users
+
+Maven Dockerhub
+https://hub.docker.com/_/maven
+
+Imagen Maven: maven:3.8.2-jdk-11
+
+Dockerfile Multistage:
+FROM maven:3.8.2-jdk-11 as builder
+WORKDIR /workspace/app
+COPY . .
+RUN mvn clean package
+
+FROM store/oracle/serverjre:8
+COPY --from=builder /workspace/app/microservicio-web/target/microservicio-web-1.0-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+docker build -f Dockerfile-Multistage  -t microservicio-multistage .
+docker run -d -p 8070:8090 microservicio-multistage
+
+
+Pull al repo: https://github.com/IngJavierR/ProyectoServicio
+Crear un directorio: jenkins_home
+Crear un directorio: Jenkins
+    Dentro crear un archivo Dockerfile (sin extensión)
+
+Al Dockerfile agregarle el siguiente contenido:
+
+FROM jenkins/jenkins:lts-jdk11
+MAINTAINER IngJavierR
+
+# Derived from https://github.com/getintodevops/jenkins-withdocker (miiro@getintodevops.com)
+USER root
+
+# Install the latest Docker CE binaries and add user `jenkins` to the docker group
+RUN apt-get update && \
+    apt-get -y --no-install-recommends install apt-transport-https \
+      ca-certificates \
+      curl \
+      wget \
+      tar \
+      gnupg2 \
+      software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \
+    add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+      $(lsb_release -cs) \
+      stable" && \
+   apt-get update && \
+   apt-get -y --no-install-recommends install docker-ce && \
+   apt-get clean && \
+   usermod -aG docker jenkins
+
+Linux/Mac
+docker run -d -p 8080:8080 -p 50000:50000 -v $(PWD)/jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkins-local
+
+Widows
+docker run -d -p 8080:8080 -p 50000:50000 -v "C:\Windows\....\jenkins_home:/var/jenkins_home" -v "//var/run/docker.sock:/var/run/docker.sock" jenkins-local
+
+Donde [Path]:
+Es la ruta completa desde C:\Windows\....\jenkins_home (Atención a las comillas)
+
+Construir Imagen de Jenkins:
+docker build -t jenkins-local .
+
+Repositorio de Docker
+https://hub.docker.com/
+
+Entrar a: http://localhost:8080
+
+docker logs [Cadena que muestra el docker run] -f
+
+Datos para Jenkins
+Usr: admin
+Pwd: admin123
+Nombre: Loque sea
+Correo: admin@admin
+(Boton azul)Continue
+
+Listar contenedores corriendo
+docker ps
+
+Listar contenedores corriendo y detenidos
+docker ps -a
+
+Detener el contenedor
+docker stop [ContainerID]
+
+Volver a levantar contenedor DETENIDO
+docker start [ContainerID] 
+
+Eliminar contenedor por completo:
+docker rm [ContainerID] 
+
+Levantar sonarqube
+docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest
+SonarURL: http://localhost:9000/
+
+
+En Jenkins ira Administrar Jenkins -> Global Tool Configuration -> Buscar Maven (hasta abajo)
+Añadir Maven
+Nombre: M3_8_2
+Combo de version: 3.8.2
+Nota: No añadir un instalador
+Darle a Save
+
+
+En Jenkins ira Administrar Jenkins -> Administrar Plugins
+Darle click a la pestaña: Todos los plugins, buscar: "SonarQube Scanner"
+Click al checkbox y luego al boton Instalar sin reiniciar
+
+
+En sonar
+A la letra A en la esquina superior derecha
+My Account -> Secutiry
+Ingresar un nombre en generate Token y darle al boton Generate
+Copiar el token y salvarlo
+
+
+En jenkins
+Administrar Jenkins -> Configurar el sistema
+Ir la seccion: SonarQube servers
+Check al Environment variables Enable injection of SonarQube server configuration as build environment variables
+Add Sonarqube
+Name: SonarServer
+URL del servidor: http://[ip de su maquina]:9000
+
+
+Agregar credenciales de Dockerhub
+Del tipo username password
+ID: dockerhub_id
+
+Ya logeados entrar a DockerHub entrar a:
+https://hub.docker.com/_/oracle-serverjre-8
+Y darle proceed to checkout
+Llenar campos
+Get Content
+
+Entrar a Jenkis: Nueva Tarea
+Selecciona Pipeline
+Ingresar nombre de proyecto aleatorio
+Darle OK
+Ir hasta la seccion de Pipiline
+En el combo de Definition selecciona: Pipeline script from SCM
+SCM: Git
+Repository URL: La url de su Github que termina en .git
+Dejamos todo lo demas como esta
+damos Guardar
+
+http://localhost:8090/microservicio/ping
+https://www.sonarqube.org/downloads/
+
+
+
+
+
+pipeline {
+    agent any
+    tools {
+        maven 'M3_8_2'
+    }
+    stages {
+        stage('Build and Analize') {
+            steps {
+                dir('microservicio-service/'){
+                    echo 'Execute Maven and Analizing with SonarServer'
+                    withSonarQubeEnv('SonarServer') {
+                        sh "mvn clean package sonar:sonar \
+                            -Dsonar.projectKey=21_MyCompany_Microservice \
+                            -Dsonar.projectName=21_MyCompany_Microservice \
+                            -Dsonar.sources=src/main \
+                            -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                            -Djacoco.output=tcpclient \
+                            -Djacoco.address=127.0.0.1 \
+                            -Djacoco.port=10001"
+                    }
+                }
+            }
+        }
+        stage('Quality Gate'){
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('Container Build') {
+            steps {
+                dir('microservicio-service/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t microservicio-service .'
+                    }
+                }
+            }
+        }
+        stage('Container Run') {
+            steps {
+                sh 'docker stop microservicio-one'
+                sh 'docker run -d --rm --name microservicio-one  -p 8090:8090 microservicio-service'
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+Quality Gates:
+https://www.jenkins.io/doc/pipeline/steps/sonar/
+
+SONARQUBE Webhook
+http://[Ip del host]:8080/sonarqube-webhook/
+
+
+Entrar a sonar -> Administracion -> Marketplace
+Buscar plugin: Dependency-Check
+
+
+docker stop [Sonar conainter iD]
+docker rm [Sonar conainter iD]    
+docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:8.9-community
+
+Habilitar el mirror de la BD de NVD
+docker run -d -p 80:80 sspringett/nvdmirror
+
+Logs del contenedor
+docker logs [ContainerID] -f
+
+
+
+
+<plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency-check-maven.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                            <goal>aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <cveUrlModified>http://192.168.1.133/nvdcve-1.1-modified.json.gz</cveUrlModified>
+                    <cveUrlBase>http://192.168.1.133/nvdcve-1.1-%d.json.gz</cveUrlBase>
+                    <formats>
+                        <format>html</format>
+                        <format>json</format>
+                    </formats>
+                    <outputDirectory>${project.basedir}/target/site/dependency</outputDirectory>
+                </configuration>
+            </plugin>
+
+<dependency-check-maven.version>6.3.1</dependency-check-maven.version>
+<sonar.dependencyCheck.htmlReportPath>${project.basedir}/microservicio-web/target/site/dependency/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
+<sonar.dependencyCheck.jsonReportPath>${project.basedir}/microservicio-web/target/site/dependency/dependency-check-report.json</sonar.dependencyCheck.jsonReportPath>
+<sonar.dependencyCheck.summarize>true</sonar.dependencyCheck.summarize>
+
+dependency-check:check
+En la linea 12 de Jenkinsfile reemplazar por esta:
+sh "mvn clean package dependency-check:check sonar:sonar \
+
+http://[Ip de la maquina]:8080/sonarqube-webhook/
+21_MyCompany_Microservice
+
+
+Levantar los servicios:
+docker ps -a
+docker start [ContainerId nvd] [ContainerId jenkins] [ContainerId sonar]
+docker stop [ContainerId nvd] [ContainerId jenkins] [ContainerId sonar]
+
+docker stop microservicio-one || true
+
+Jenkinsfile utiliza Groovy: https://groovy-lang.org/
+
+https://hub.docker.com/r/sonatype/nexus3/
+
+docker run -d -p 8081:8081 -p 8082:8082 -p 8083:8083 --name nexus sonatype/nexus3
+
+
+"insecure-registries": [
+    "ip-maquina:8083"
+]
+
+
+{
+  "experimental": false,
+  "insecure-registries": [
+    "192.168.1.133:8083"
+  ],
+  "builder": {
+    "gc": {
+      "defaultKeepStorage": "20GB",
+      "enabled": true
+    }
+  },
+  "features": {
+    "buildkit": true
+  }
+}
+
+docker exec -it [ContainerId] bash
+docker exec -it [ContainerId] bash -c "cat /nexus-data/admin.password"
+
+
+Nexus con Volumen: https://hub.docker.com/r/sonatype/nexus3/#Persistent%20Data
+
+Taggear una imagen:
+docker tag local-image:tagname new-repo:tagname
+docker push new-repo:tagname
+docker push ingjavierr/microservicio-hub:tagname
+
+docker build -t ingjavierr/microservicio-hub:dev .
+docker tag microservicio-service:latest ingjavierr/microservicio-hub:dev
+docker push ingjavierr/microservicio-hub:dev
+
+docker ingjavierr/microservicio-hub:dev
+docker run -d --rm --name microservicio-one  -p 8090:8090 ingjavierr/microservicio-hub:dev
+
+https://hazelapd.medium.com/gitflow-en-la-vida-real-2f80bc43909d
+https://www.jenkins.io/doc/pipeline/tour/environment/
+
+
+LOCAL ENVIRONMENTS
+agent any
+environment {
+    LOCAL_SERVER = '192.168.1.133'
+}
+
+sh 'docker login ${LOCAL_SERVER}:8083 -u $USERNAME -p $PASSWORD'
+sh 'docker tag microservicio-service:latest ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+
+docker run -d --rm --name microservicio-one -p 8090:8090 192.168.1.133:8083/repository/docker-private/microservicio_nexus:dev
+
+En caso de usar Docker-Group sería:
+192.168.1.133:8082/repository/docker-group/microservicio_nexus:dev
+
+Nuevo Docker run:
+sh 'docker run -d --rm --name microservicio-one -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+
+
+${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:relesease-0.1.1
+${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:relesease-0.1.2
+${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:relesease-0.1.3
+
+${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:prod-0.2.1
+${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:prod-0.2.2
+${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:prod-0.2.3
+${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:latest
+
+sh "mvn clean package  \
+-Dsonar.projectKey=21_MyCompany_Microservice \
+-Dsonar.projectName=21_MyCompany_Microservice \
+-Dsonar.sources=src/main \
+                            -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                            -Djacoco.output=tcpclient \
+                            -Djacoco.address=127.0.0.1 \
+                            -Djacoco.port=10001"
+
+Instalar base de datos postgresql:
+docker run --name postgres-1 -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=project123 -e POSTGRES_DB=microservicio -d postgres
+
+docker stop [Containerid  Jenkins]
+docker rm [Containerid  Jenkins]
+docker images
+docker rmi [ImageID Jenkins]
+
+
+Agregar al Dockerfile de Jenkins:
+
+ARG LIQUIBASE_VERSION=3.10.1
+
+RUN mkdir /opt/liquibase && \
+  wget -O liquibase-${LIQUIBASE_VERSION}.tar.gz "https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz" && \
+  tar -xzf liquibase-${LIQUIBASE_VERSION}.tar.gz -C /opt/liquibase && \
+  rm liquibase-${LIQUIBASE_VERSION}.tar.gz
+
+
+Descargar la solución de Liquibase
+git clone https://github.com/IngJavierR/liquibase.git
+
+
+<?xml version="1.0" encoding="UTF-8"?> 
+<databaseChangeLog 
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd"> 
+    <changeSet author="authorName" id="changelog-1.0">
+        <createTable tableName="USERS">
+            <column name="ID" type="INT">
+                <constraints nullable="true" primaryKey="true" unique="false"/>
+            </column>
+            <column name="DS_NAME" type="VARCHAR(50)">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="DS_LASTNAME" type="VARCHAR(50)">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="AGE" type="INT">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog> 
+
+stage('Database') {
+    steps {
+        dir('liquibase/'){
+            sh '/opt/liquibase/liquibase --version'
+            sh '/opt/liquibase/liquibase --changeLogFile="changesets/db.changelog-master.xml" update'
+            echo 'Applying Db changes'
+        }
+    }
+}
+
+
+En el archivo:
+microservicio-service/microservicio-web/src/main/resources/application-qa.yml
+url: jdbc:postgresql://[Ip de su maquina]:5432/microservicio
+
+Agregar la variable de entorno SPRING_PROFILES_ACTIVE a docker run:
+sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+
+
+INSERT INTO users (id, ds_name, ds_lastname, age) VALUES(1, 'Javier', 'Rodriguez', 20);
+INSERT INTO users (id, ds_name, ds_lastname, age) VALUES(2, 'Francisco', 'Rodriguez', 20);
+
+docker run --name postgres-1 -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=project123 -e POSTGRES_DB=microservicio -d postgres:11
+
+Descargar y recordar eliminar la carpeta .git
+git clone https://github.com/IngJavierR/Angular7BaseCli.git
+
+
+Instalar plugin NodeJS
+Global Tool Configuration
+Nombre: NodeJs12
+Version: 12.0.0
+
+Modificar el Jenkinsfile (sección tools)
+tools {
+    maven 'M3_8_2'
+    nodejs 'NodeJs12'
+}
+
+
+stage('Frontend') {
+    steps {
+        echo 'Building Frontend'
+        dir('frontend/'){
+            sh 'npm install'
+            sh 'npm run build'
+            sh 'docker stop frontend-one || true'
+            sh "docker build -t frontend-web ."
+            sh 'docker run -d --rm --name frontend-one -p 8010:80 frontend-web'
+        }
+    }
+}
+
+El frontend se levanta en:
+http://localhost:8010/
+
+
+Descargar proyecto Cypress (quitar carpeta .git):
+git clone https://github.com/IngJavierR/Cypress.git
+
+https://nodejs.org/es/
+cd Cypress
+npm install
+
+Ejecutar:
+Linux/Mac
+./node_modules/.bin/cypress open
+./node_modules/.bin/cypress run
+
+Windows:
+node_modules\.bin\cypress open
+node_modules\.bin\cypress run
+
+https://hub.docker.com/r/cypress/base
+https://github.com/cypress-io/cypress-docker-images
+
+
+describe('Prueba local', () => {
+
+    it('Test', () => {
+        cy.visit('http://[Ip Maquina]:8010/')
+        cy.get('#mat-input-0').clear().type('admin')
+        cy.get('.mat-raised-button').click()
+        cy.get('h1').should('contain', 'Abouts')
+    });
+
+});
+
+stage('Testing') {
+            steps {
+                dir('cypress/') {
+                    sh 'docker run --rm --name Cypress -v /Users/javierrodriguez/Documents/Repositorios/CursoMicroservicios/jenkins_home/workspace/Pruebas/cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
+                }
+            }
+        }
+        stage('tar videos') 
+        {
+            steps 
+            {
+                dir('cypress/cypress/videos/') {
+                    sh 'tar -cvf videos.tar .'
+                    archiveArtifacts artifacts: 'videos.tar',
+                    allowEmptyArchive: true
+                }
+            }
+        }
+
+Linux/Mac
+sh 'docker run --rm --name Cypress -v [Ruta completa Jenkins_home]/jenkins_home/workspace/Pruebas/cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
+
+
+Windows
+sh 'docker run --rm --name Cypress -v "[Ruta Completa Jenkins_home con comillas]/jenkins_home/workspace/Pruebas/cypress:/e2e" -w /e2e -e Cypress cypress/included:3.4.0'
+
+
+
+
+
+
+
+
+
   625  mvn gatling:test
   626  mvn clean
   627  mvn install
@@ -14,3 +813,4 @@
   638  git commit -a -m "Prueba con front y cypress"
   639  git push
   640  git commit -a -m "Prueba con front y cypress"
+

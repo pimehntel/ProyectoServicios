@@ -14,3 +14,346 @@
   883  cd ..
   884  cd ProyectoServicios
   885  ls -ltr
+
+
+stage('Testing') {
+            steps {
+                dir('cypress/') {
+                    sh 'docker build -t cypressfront .'
+                    sh 'docker run cypressfront'
+                    //sh 'docker run --rm --name Cypress -v /Users/javierrodriguez/Documents/Repositorios/EcosistemaJenkins/jenkins_home/workspace/Microservicio/Cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
+                }
+            }
+        }
+        
+Pruebas de Estress 
+https://gatling.io/
+https://gatling.io/academy/
+https://gatling.io/open-source/
+
+Gatling con Maven:
+(No olviden eliminar la carpeta .git)
+git clone https://github.com/gatling/gatling-maven-plugin-demo.git
+
+Fragmento Post Construcción:
+post {
+        always {
+            deleteDir()
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'I failed :('
+        }
+        changed {
+            echo 'Things were different before...'
+        }
+    }
+    
+    
+Estress y microservicios:
+Contenedores:
+postgres
+jenkins-local
+
+Y el jenkinsfile (Importante cambiar ip de su maquina):
+pipeline {
+    agent any
+    environment {
+        LOCAL_SERVER = 'ip de su maquina'
+    }
+    tools {
+        maven 'M3_8_2'
+        nodejs 'NodeJs12'
+    }
+    stages {
+        stage('Build and Analize') {
+            steps {
+                dir('microservicio-service/'){
+                    echo 'Execute Maven and Analizing with SonarServer'
+                    withSonarQubeEnv('SonarServer') {
+                        sh "mvn clean package  \
+                            -Dsonar.projectKey=21_MyCompany_Microservice \
+                            -Dsonar.projectName=21_MyCompany_Microservice \
+                            -Dsonar.sources=src/main \
+                            -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                            -Djacoco.output=tcpclient \
+                            -Djacoco.address=127.0.0.1 \
+                            -Djacoco.port=10001"
+                    }
+                }
+            }
+        }
+        /*stage('Quality Gate'){
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }*/
+        /*stage('Frontend') {
+            steps {
+                echo 'Building Frontend'
+                dir('frontend/'){
+                    sh 'npm install'
+                    sh 'npm run build'
+                    sh 'docker stop frontend-one || true'
+                    sh "docker build -t frontend-web ."
+                    sh 'docker run -d --rm --name frontend-one -p 8010:80 frontend-web'
+                }
+            }
+        }*/
+
+        stage('Database') {
+            steps {
+                dir('liquibase/'){
+                    sh '/opt/liquibase/liquibase --version'
+                    sh '/opt/liquibase/liquibase --changeLogFile="changesets/db.changelog-master.xml" update'
+                    echo 'Applying Db changes'
+                }
+            }
+        }
+        stage('Container Build') {
+            steps {
+                dir('microservicio-service/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t microservicio-service .'
+                    }
+                }
+            }
+        }
+        /*stage('Container Push Nexus') {
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    sh 'docker login ${LOCAL_SERVER}:8083 -u $USERNAME -p $PASSWORD'
+                    sh 'docker tag microservicio-service:latest ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                    sh 'docker push ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                }
+            }
+        }*/
+        stage('Container Run') {
+            steps {
+                sh 'docker stop microservicio-one || true'
+                sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 microservicio-service'
+            }
+        }
+        /*stage('Testing') {
+            steps {
+                dir('cypress/') {
+                    sh 'docker build -t cypressfront .'
+                    sh 'docker run cypressfront'
+                    //sh 'docker run --rm --name Cypress -v /Users/javierrodriguez/Documents/Repositorios/EcosistemaJenkins/jenkins_home/workspace/Microservicio/Cypress:/e2e -w /e2e -e Cypress cypress/included:3.4.0'
+                }
+            }
+        }*
+        /*stage('tar videos') 
+        {
+            steps 
+            {
+                dir('cypress/cypress/videos/') {
+                    sh 'tar -cvf videos.tar .'
+                    archiveArtifacts artifacts: 'videos.tar',
+                    allowEmptyArchive: true
+                }
+            }
+        }*/
+    }
+    /*post {
+        always {
+            deleteDir()
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        failure {
+            echo 'I failed :('
+        }
+    }*/
+}
+
+Instalar plugin de gatling en Jenkins
+Extensión Visual Studio: Scala Syntax (official)
+
+
+http://[ip maquina]:8090/microservicio/users
+http://[ip maquina]:8090/microservicio/ping
+
+El archivo de simulación esta en:
+Gatling/src/test/scala/computerdatabase/BasicSimulation.scala
+
+setUp(
+    scn.inject(
+      atOnceUsers(10)
+  ).protocols(httpProtocol))
+
+https://gatling.io/docs/gatling/reference/current/general/simulation_setup/
+atOnceUsers(10),
+rampUsers(10).during(5.seconds),
+
+Escenario Gatling:
+val scn = scenario("Consulta usuarios de negocio") // A scenario is a chain of requests and pauses
+    .exec(http("Consulta Usuarios")
+      .get("/users"))
+    .pause(7)
+    .exec(http("Validar ping")
+      .get("/ping"))
+    .pause(7)
+
+
+Stage de Estress:
+stage('Estress') {
+            steps {
+                dir('Gatling/'){
+                    sh 'mvn gatling:test'
+                }
+            }
+            post {
+                always {
+                    gatlingArchive()
+                }
+            }
+        }
+
+docker run --name postgres-1 -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=project123 -e POSTGRES_DB=microservicio -d postgres:11
+
+
+docker images -f "dangling=true" -q
+Remover imagenes que no se concretaron
+docker rmi $(docker images -f "dangling=true" -q)
+
+Laboratorio Zuul y Eureka
+git clone https://github.com/IngJavierR/ZuulBase.git
+git clone https://github.com/IngJavierR/EurekaBase.git
+
+
+Microservicio-service:
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://[ip maquina]:8761/eureka
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    preferIpAddress: true
+
+Dockerfile ZuulBase:
+FROM openjdk:11
+COPY target/Zuul-1.0-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
+Dockerfile EurekaBase:
+FROM openjdk:11
+COPY target/Eureka-1.0-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
+stage('Zuul') {
+            steps {
+                dir('ZuulBase/'){
+                    sh 'mvn clean package'
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t zuul .'
+                        sh 'docker stop zuul-service || true'
+                        sh 'docker run -d --rm --name zuul-service -p 8000:8000 zuul'
+                    }
+                }
+            }
+        }
+        stage('Eureka') {
+            steps {
+                dir('EurekaBase/'){
+                    sh 'mvn clean package'
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t eureka .'
+                        sh 'docker stop eureka-service || true'
+                        sh 'docker run -d --rm --name eureka-service -p 8761:8761 eureka'
+                    }
+                }
+            }
+        }
+            
+https://www.oracle.com/mx/java/technologies/javase/jdk11-archive-downloads.html
+
+https://github.com/IngJavierR/ProyectoServicios
+
+http://localhost:8000/apimicros/microservicio/users
+
+Revisar logs en contenedores
+docker logs [ContainerID] -f
+Ejemplo: docker logs f1d8cbdf4334 -f
+
+FROM store/oracle/serverjre:8
+
+INSERT INTO users (id, ds_name, ds_lastname, age) VALUES(1, 'Javier', 'Rodriguez', 20);
+INSERT INTO users (id, ds_name, ds_lastname, age) VALUES(2, 'Francisco', 'Rodriguez', 20);
+
+
+Crear replicas a mano:
+        stage('Container Run') {
+            steps {
+                sh 'docker stop microservicio-one || true'
+                sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 microservicio-service'
+
+                sh 'docker stop microservicio-one-two || true'
+                sh 'docker run -d --rm --name microservicio-one-two -e SPRING_PROFILES_ACTIVE=qa -p 8091:8090 microservicio-service'
+            }
+        }
+
+microservicio-service/
+
+Compilar
+when {
+    anyOf {
+        changeset "*microservicio-service/**"
+        expression { currentBuild.previousBuild.result != "SUCCESS"}
+    }
+}
+
+Git Server
+https://hub.docker.com/r/jkarlos/git-server-docker/
+
+Para ver los logs de los microservicios:
+docker logs [ContainerID] -f
+docker logs [ContainerID] -f
+
+docker network ls
+docker network inspect [NetworkID Bridge]
+
+docker exec -it [container id] bash
+
+https://hub.docker.com/_/busybox
+docker run -it --rm busybox
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
