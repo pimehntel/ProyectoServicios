@@ -212,9 +212,6 @@ pipeline {
 
                 sh 'docker stop microservicio-two || true'
                 sh 'docker run -d --rm --name microservicio-two -e SPRING_PROFILES_ACTIVE=qa microservicio-service'
-
-
-
             }
         }
 
@@ -229,9 +226,6 @@ pipeline {
 
                 sh 'docker stop microservicio-two-two || true'
                 sh 'docker run -d --rm --name microservicio-two-two -e SPRING_PROFILES_ACTIVE=qa microservicio-service-two'
-
-
-
             }
         }
 
