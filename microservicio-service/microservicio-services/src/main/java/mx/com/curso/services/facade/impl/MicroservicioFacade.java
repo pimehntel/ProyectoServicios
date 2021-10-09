@@ -17,15 +17,12 @@ public class MicroservicioFacade implements IMicroservicioFacade {
     @Autowired
     private IMicroservicioService microservicioService;
 
-
     @Autowired
     RestTemplate restTemplate;
 
     public List<UserTO> getAllUsers() {
-        //return this.microservicioService.getUsers();
-        //ResponseEntity<UserTO[]> response = restTemplate.getForEntity("http://localhost:8000/microserviciotwo/microservicio/users",UserTO[].class);
-          ResponseEntity<UserTO[]> response = restTemplate.getForEntity("http://microservicio-service-two/microservicio/users", UserTO[].class);
+        ResponseEntity<UserTO[]> response = restTemplate.getForEntity("http://microservicio-service-two/microservicio/users", UserTO[].class);
         return Arrays.asList(response.getBody());
-
+        //return this.microservicioService.getUsers();
     }
 }
