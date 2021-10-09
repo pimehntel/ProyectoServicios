@@ -23,7 +23,7 @@ pipeline {
                 echo 'Building Backend'
                 dir('microservicio-service/'){
                     echo 'Execute Maven and Analizing with SonarServer'
-                        sh "mvn clean package \
+                        sh "mvn clean package -DskipTests\
                             -Djacoco.output=tcpclient \
                             -Djacoco.address=127.0.0.1 \
                             -Djacoco.port=10001"                    
