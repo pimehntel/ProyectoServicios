@@ -8,7 +8,7 @@ pipeline {
         nodejs 'NodeJS12'    
     }
     stages {
-        stage('Build and Analize Backend') {
+        stage('Build and Analize MicroServicio 1') {
             when{
                 anyOf{
                     //Cuando encuentre un cambio de esto de la ruta y subruta.
@@ -22,6 +22,30 @@ pipeline {
             steps {
                 echo 'Building Backend'
                 dir('microservicio-service/'){
+                    echo 'Execute Maven and Analizing with SonarServer'
+                        sh "mvn clean package \
+                            -Djacoco.output=tcpclient \
+                            -Djacoco.address=127.0.0.1 \
+                            -Djacoco.port=10001"                    
+                }
+            }
+        }
+
+        stages {
+        stage('Build and Analize MicroServicio 2') {
+            when{
+                anyOf{
+                    //Cuando encuentre un cambio de esto de la ruta y subruta.
+                    changeset "*microservicio-service-two/**"
+                    expression{
+                        //Variable de jenkins que da datos de la compilacion
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
+            steps {
+                echo 'Building Backend'
+                dir('microservicio-service-two/'){
                     echo 'Execute Maven and Analizing with SonarServer'
                         sh "mvn clean package \
                             -Djacoco.output=tcpclient \
@@ -75,7 +99,7 @@ pipeline {
             }
         }
 
-        stage('Container Build') {
+        stage('Container Build MicroServicio 1') {
             when{
                     anyOf{
                         //Cuando encuentre un cambio de esto de la ruta y subruta.
@@ -95,6 +119,28 @@ pipeline {
                 }
             }
         }
+
+        stage('Container Build MicroServicio 2') {
+            when{
+                    anyOf{
+                        //Cuando encuentre un cambio de esto de la ruta y subruta.
+                        changeset "*microservicio-service-two/**"
+                        expression{
+                            //Variable de jenkins que da datos de la compilacion
+                            currentBuild.previousBuild.result != "SUCCESS"
+                        }
+                    }
+                }
+            steps {
+                dir('microservicio-service-two/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t microservicio-service-two .'
+                    }
+                }
+            }
+        }
+
         
         stage('Zuul') {
                 when{
@@ -156,20 +202,24 @@ pipeline {
         }        
         */
 
-        stage('Container Run') {
+        stage('Container Run MicroServicio 2') {
             steps {
                 //Esto solo es borrar la imagen para ver que se bajse del repo nexus
                 //sh 'docker rmi ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
-                sh 'docker stop microservicio-one || true'
+                sh 'docker stop microservicio-two-one || true'
                 //Para poner que ambiente, desarrollo, pruebas, prod SPRING_PROFILE_ACTIVE para lo de DB del microservicio
                 //sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'              
-                sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa microservicio-service'
+                sh 'docker run -d --rm --name microservicio-two-one -e SPRING_PROFILES_ACTIVE=qa microservicio-service-two'
 
-                sh 'docker stop microservicio-two || true'
-                sh 'docker run -d --rm --name microservicio-two -e SPRING_PROFILES_ACTIVE=qa microservicio-service'
+                sh 'docker stop microservicio-two-two || true'
+                sh 'docker run -d --rm --name microservicio-two-two -e SPRING_PROFILES_ACTIVE=qa microservicio-service-two'
+
+
 
             }
         }
+
+
         
         /*
         stage('Testing') {
