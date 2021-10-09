@@ -8,11 +8,11 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
     show-sql: true
   application:
-    name: microservicio-service
+    name: microservicio-service-two
   profiles: qa
 
 server:
-  port: 8090
+  port: 8100
 
 eureka:
   client:
