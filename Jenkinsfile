@@ -9,6 +9,16 @@ pipeline {
     }
     stages {
         stage('Build and Analize Backend') {
+            when{
+                anyOf{
+                    //Cuando encuentre un cambio de esto de la ruta y subruta.
+                    changeset "*microservicio-service/**"
+                    expression{
+                        //Variable de jenkins que da datos de la compilacion
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 echo 'Building Backend'
                 dir('microservicio-service/'){
@@ -46,6 +56,16 @@ pipeline {
         */
         
         stage('Database') {
+            when{
+                    anyOf{
+                        //Cuando encuentre un cambio de esto de la ruta y subruta.
+                        changeset "*liquibase/**"
+                        expression{
+                            //Variable de jenkins que da datos de la compilacion
+                            currentBuild.previousBuild.result != "SUCCESS"
+                        }
+                    }
+                }
             steps {
                 dir('liquibase/'){
                     sh '/opt/liquibase/liquibase --version'
@@ -56,6 +76,16 @@ pipeline {
         }
 
         stage('Container Build') {
+            when{
+                    anyOf{
+                        //Cuando encuentre un cambio de esto de la ruta y subruta.
+                        changeset "*microservicio-service/**"
+                        expression{
+                            //Variable de jenkins que da datos de la compilacion
+                            currentBuild.previousBuild.result != "SUCCESS"
+                        }
+                    }
+                }
             steps {
                 dir('microservicio-service/'){
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -67,6 +97,16 @@ pipeline {
         }
         
         stage('Zuul') {
+                when{
+                    anyOf{
+                        //Cuando encuentre un cambio de esto de la ruta y subruta.
+                        changeset "*ZuulBase/**"
+                        expression{
+                            //Variable de jenkins que da datos de la compilacion
+                            currentBuild.previousBuild.result != "SUCCESS"
+                        }
+                    }
+                }
                 steps {
                     dir('ZuulBase/'){
                         sh 'mvn clean package'
@@ -81,6 +121,16 @@ pipeline {
             }
             
             stage('Eureka') {
+                when{
+                    anyOf{
+                        //Cuando encuentre un cambio de esto de la ruta y subruta.
+                        changeset "*EurekaBase/**"
+                        expression{
+                            //Variable de jenkins que da datos de la compilacion
+                            currentBuild.previousBuild.result != "SUCCESS"
+                        }
+                    }
+                }
                 steps {
                     dir('EurekaBase/'){
                         sh 'mvn clean package'
