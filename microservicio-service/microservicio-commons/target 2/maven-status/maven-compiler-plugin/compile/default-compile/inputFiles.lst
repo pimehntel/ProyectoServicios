@@ -1,8 +1,0 @@
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/exceptions/ForbiddenException.java
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/aspects/RequestValidatorAspect.java
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/exceptions/UnauthorizedException.java
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/to/UserTO.java
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/exceptions/BusinessException.java
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/exceptions/ParametersException.java
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/exceptions/NotFoundException.java
-/Users/livierortegavelazquez/Documents/GitHub/ProyectoServicios/microservicio-service/microservicio-commons/src/main/java/mx/com/curso/commons/to/ErrorTO.java
