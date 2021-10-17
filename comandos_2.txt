@@ -335,6 +335,164 @@ https://hub.docker.com/_/busybox
 docker run -it --rm busybox
 
 
+ribbon:
+  ReadTimeout: 60000
+  ConnectionTimeout: 3000
+
+
+Comunicación entre servicios:
+Modificar el archivo:
+microservicio-service/microservicio-services/src/main/java/mx/com/curso/services/facade/impl/MicroservicioFacade.java
+package mx.com.curso.services.facade.impl;
+import mx.com.curso.commons.to.UserTO;
+import mx.com.curso.services.facade.IMicroservicioFacade;
+import mx.com.curso.services.service.IMicroservicioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Component
+public class MicroservicioFacade implements IMicroservicioFacade {
+
+    @Autowired
+    private IMicroservicioService microservicioService;
+
+    @Autowired
+    RestTemplate restTemplate;
+
+    public List<UserTO> getAllUsers() {
+        ResponseEntity<UserTO[]> response = restTemplate.getForEntity("http://microservicio-service-two/microservicio/users", UserTO[].class);
+        return Arrays.asList(response.getBody());
+        //return this.microservicioService.getUsers();
+    }
+}
+
+
+
+Solo de referencia, no se modifica:
+microservicio-service/microservicio-web/src/main/java/mx/com/curso/web/Application.java
+
+En el jenkinsfile, solo en el maven del primer servicio colocar: -DskipTests
+sh "mvn clean package -DskipTests \
+
+zuul:
+  ignoredServices: '*'
+  host:
+    connect-timeout-millis: 20000
+    socket-timeout-millis: 20000
+  routes:
+    microservicio-service: # Service to create as sample
+      path: /apimicros/** #path that will be intercepted
+      serviceId: microservicio-service
+      stripPrefix: true  #if zuul should replace the "/sample/" segment
+    microservicio-service-two: # Service to create as sample
+      path: /apimicrostwo/** #path that will be intercepted
+      serviceId: microservicio-service-two
+      stripPrefix: true  #if zuul should replace the "/sample/" segment
+
+
+
+docker run -d -p 8100:80 ingjavierr/nginx-angular6
+
+Conectarte a contenedor activo:
+docker exec -it [ContainerID] bin/bash
+
+docker run -it -p 9090:80 ubuntu bin/bash
+apt-get update -y
+apt-get install -y apache2 apache2-utils
+apt-get install -y vim
+/usr/sbin/apache2ctl start
+vi /var/www/html/hola.html
+
+<html>
+    <head>
+        Hello from Ubuntu
+    </head>
+    <body>
+        <h1>
+            Hola desde Ubuntu en Docker
+        </h1>
+    </body>
+</html>
+
+Para guardaar: esc + : + wq
+
+Url: http://localhost:9090/hola.html
+
+
+FROM ubuntu
+RUN apt-get update -y && apt-get install -y apache2 apache2-utils
+ENV TZ=r
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+COPY hola.html /var/www/html/hola.html
+CMD /usr/sbin/apache2ctl -D FOREGROUND
+
+docker build -t hola .
+docker run -d -p 9091:80 hola
+http://localhost:9091/hola.html
+
+RUN mvn clean package -DskipTests
+microservicio-service/microservicio-web/src/main/resources/application.yml
+microservicio-service/microservicio-web/src/main/java/mx/com/curso/web/rest/HelloController.java
+
+docker build -f Dockerfile-Multistage -t [usuario dockehub]/microservicio-one:v1 .
+docker run -d --rm -p 8090:8090 [usuario dockehub]/microservicio-one:v1
+Para probar: http://localhost:8090/microservicio/ping
+docker push [usuario dockehub]/microservicio-one:v1
+
+Despues de cambiar: return new ResponseEntity<>("pong-Version2", HttpStatus.OK);
+docker build -f Dockerfile-Multistage -t [usuario dockehub]/microservicio-one:v2 .
+docker run -d --rm -p 8090:8090 [usuario dockehub]/microservicio-one:v2
+docker push [usuario dockehub]/microservicio-one:v2
+
+
+KUBERNETES COMMANDS:
+
+kubectl config view
+kubectl config get-contexts
+kubectl config use-context docker-desktop
+
+
+
+LAB1:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-dep
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-world-pod
+  template:
+    metadata:
+      labels:
+        app: hello-world-pod
+    spec:
+      containers:
+      - name: hello-world-container
+        image: ingjavierr/microservicio-one:v1
+        ports:
+        - containerPort: 8090
+
+kubectl apply -f BasicDeployment.yaml
+kubectl get deployments
+kubectl get pods
+kubectl get rs
+kubectl delete -f BasicDeployment.yaml
+
+
+
+
+
+
+
+
 
 
 
