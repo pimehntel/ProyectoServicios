@@ -46,4 +46,4 @@ spec:
   - port: 5432
     protocol: TCP
     targetPort: 5432
-  type: ClusterIP
+  type: LoadBalancer
