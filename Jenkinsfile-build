@@ -1,12 +1,13 @@
 pipeline {
     agent any
     environment {
-        LOCAL_SERVER = '192.168.1.133'
+        LOCAL_SERVER = '192.168.1.71'
     }
     tools {
         maven 'M3_8_2'
-        nodejs 'NodeJs12'
+        nodejs 'NodeJS12'
     }
+    
     stages {
         stage('Build and Analize') {
             when {
