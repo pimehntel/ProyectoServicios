@@ -16,8 +16,8 @@ import java.util.List;
 @Component
 public class MicroservicioFacade implements IMicroservicioFacade {
 
-    @Value("${MICROSERVICE_TWO_SVC_SERVICE_HOST}")
-    private String serviceHost;
+//    @Value("${MICROSERVICE_TWO_SVC_SERVICE_HOST}")
+//    private String serviceHost;
     @Value("${MICROSERVICE_TWO_SVC_SERVICE_PORT}")
     private String servicePort;
 
